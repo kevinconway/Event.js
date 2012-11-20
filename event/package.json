@@ -3,10 +3,10 @@
   "name": "eventjs",
   "description": "Cross platform, asynchronous events for JavaScript.",
   "version": "1.0.0",
-  "homepage": "https://github.com/kevinconway/Modelo.js",
+  "homepage": "https://github.com/kevinconway/Event.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/kevinconway/Modelo.js.git"
+    "url": "git://github.com/kevinconway/Event.js.git"
   },
   "main": "./event.js",
   "scripts": {
