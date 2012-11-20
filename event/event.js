@@ -30,12 +30,12 @@ SOFTWARE.
     var env = factory.env,
         def = factory.def,
         deps = {
-            amd: ['./modelo.js', './defer.js'],
-            node: ['./modelo.js', './defer.js'],
-            browser: ['Modelo', 'Modelo/defer']
+            amd: ['./node_modules/modelo/modelo.js', './node_modules/deferjs/defer.js'],
+            node: ['modelo', 'deferjs'],
+            browser: ['Modelo', 'defer']
         };
 
-    def.call(this, 'Modelo/Event', deps[env], function (Modelo, defer) {
+    def.call(this, 'Event', deps[env], function (Modelo, defer) {
 
         var EventMixin, emptyContext;
 

@@ -7,12 +7,12 @@
     var env = factory.env,
         def = factory.def,
         deps = {
-            amd: ['lib/expect', '../modelo/modelo', '../modelo/event'],
-            node: ['./lib/expect', '../modelo/modelo.js', '../modelo/event.js'],
-            browser: ['expect', 'Modelo', 'Modelo/Event']
+            amd: ['lib/expect', '../event/node_modules/modelo/modelo.js', '../event/event'],
+            node: ['./lib/expect', '../event/node_modules/modelo/modelo.js', '../event/event.js'],
+            browser: ['expect', 'Modelo', 'Event']
         };
 
-    def.call(this, 'spec/Modelo/Event', deps[env], function (expect, Modelo, EventMixin) {
+    def.call(this, 'spec/Event', deps[env], function (expect, Modelo, EventMixin) {
 
         describe('The Event library', function () {
 
