@@ -106,20 +106,20 @@ API Reference
 Exports
 -------
 
-This module exports a single Modelo objects that can be used as is, extended
+This module exports a single Modelo object that can be used as is, extended
 directly, or mixed into other Modelo objects. In a Node.js or AMD environment
 the object can simply be required::
 
-    var Event = require('event');
+    var Event = require('eventjs');
 
     typeof Event.extend === "function"; // true
 
-In a browser environment, the `Event` object is made available under the
-global `Modelo` object at `Modelo.Event`::
+In a browser environment, the package is exposed under the global `Event`
+variable::
 
-    typeof Modelo.Event.extend === "function"; // true
+    typeof Event.extend === "function"; // true
 
-All instances of object inheriting from the Event object gain a standard set
+All instances of objects inheriting from the Event object gain a standard set
 of event handling functionality.
 
 on(event, callback[, context])
