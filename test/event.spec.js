@@ -14,7 +14,7 @@
 
     def.call(this, 'spec/Event', deps[env], function (expect, Modelo, EventMixin) {
 
-        describe('The Event library', function () {
+        describe('Event.js', function () {
 
             it('loads in the current environment (' + env + ')', function () {
 
