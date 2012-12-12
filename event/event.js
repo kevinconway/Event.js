@@ -121,7 +121,7 @@ SOFTWARE.
 
             if (context === undefined) {
 
-                for (x = 0; x < this.events[event].length; x = x + 1) {
+                for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
 
                     if (this.events[event][x].callback === callback) {
 
@@ -135,7 +135,7 @@ SOFTWARE.
 
             }
 
-            for (x = 0; x < this.events[event].length; x = x + 1) {
+            for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
 
                 if (this.events[event][x].callback === callback &&
                     this.events[event][x].context === context) {
