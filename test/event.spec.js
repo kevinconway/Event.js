@@ -14,7 +14,7 @@
 
     def.call(this, 'spec/Event', deps[env], function (expect, Modelo, EventMixin) {
 
-        describe('The Event library', function () {
+        describe('Event.js', function () {
 
             it('loads in the current environment (' + env + ')', function () {
 
@@ -84,6 +84,27 @@
                 t.trigger('test');
 
                 expect(test_value.test).to.be(undefined);
+
+            });
+
+            it('removes events of the same callback but different context correctly', function() {
+
+              var t = new EventMixin(),
+                  callback = function() {},
+                  fakeCtx = function() {};
+
+              t.on('test', callback, fakeCtx);
+              t.on('test', callback, fakeCtx);
+              t.on('test', callback, this);
+              t.on('test', callback, this);
+
+              expect(t.events['test'].length).to.be(4);
+  
+              t.off('test', callback, fakeCtx);
+              expect(t.events['test'].length).to.be(2);
+
+              t.off('test', callback, this);
+              expect(t.events['test'].length).to.be(0);
 
             });
 
