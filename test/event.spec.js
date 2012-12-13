@@ -1,7 +1,7 @@
 /*global require, define, module, describe, it, xit
 
 */
-(function (factory) {
+(function (ctx, factory) {
     "use strict";
 
     var env = factory.env,
@@ -12,7 +12,7 @@
             browser: ['expect', 'Modelo', 'Event']
         };
 
-    def.call(this, 'spec/Event', deps[env], function (expect, Modelo, EventMixin) {
+    def.call(ctx, 'spec/Event', deps[env], function (expect, Modelo, EventMixin) {
 
         describe('Event.js', function () {
 
@@ -112,7 +112,7 @@
 
     });
 
-}.call(this, (function () {
+}(this, (function (ctx) {
     "use strict";
 
     var currentEnvironment,
@@ -129,7 +129,7 @@
 
         currentEnvironment = 'node';
 
-    } else if (this.window !== undefined) {
+    } else if (ctx.window !== undefined) {
 
         currentEnvironment = 'browser';
 
@@ -212,7 +212,7 @@
 
         }
 
-    }.call());
+    }());
 
 
     return {
@@ -220,4 +220,4 @@
         def: generator
     };
 
-}.call(this))));
+}(this))));
