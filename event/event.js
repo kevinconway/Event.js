@@ -37,9 +37,7 @@ SOFTWARE.
 
     def.call(this, 'Event', deps[env], function (Modelo, defer) {
 
-        var EventMixin, emptyContext;
-
-        emptyContext = {};
+        var EventMixin;
 
         // The Event object is a Modelo object that provides asynchronous
         // events. While new instances of Event can be created directly, it
@@ -65,7 +63,7 @@ SOFTWARE.
                 return this;
             }
 
-            context = context || emptyContext;
+            context = context || null;
 
             this.events[event] = this.events[event] || [];
 
@@ -104,8 +102,8 @@ SOFTWARE.
             var x;
 
             if (callback === undefined &&
-                context === undefined &&
-                event === undefined) {
+                    context === undefined &&
+                    event === undefined) {
 
                 this.events = {};
                 return this;
@@ -138,7 +136,7 @@ SOFTWARE.
             for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
 
                 if (this.events[event][x].callback === callback &&
-                    this.events[event][x].context === context) {
+                        this.events[event][x].context === context) {
 
                     this.events[event].splice(x, 1);
 
