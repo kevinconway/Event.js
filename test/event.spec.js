@@ -87,24 +87,24 @@
 
             });
 
-            it('removes events of the same callback but different context correctly', function() {
+            it('removes events of the same callback but different context correctly', function () {
 
-              var t = new EventMixin(),
-                  callback = function() {},
-                  fakeCtx = function() {};
+                var t = new EventMixin(),
+                    callback = function () {},
+                    fakeCtx = function () {};
 
-              t.on('test', callback, fakeCtx);
-              t.on('test', callback, fakeCtx);
-              t.on('test', callback, this);
-              t.on('test', callback, this);
+                t.on('test', callback, fakeCtx);
+                t.on('test', callback, fakeCtx);
+                t.on('test', callback);
+                t.on('test', callback);
 
-              expect(t.events['test'].length).to.be(4);
-  
-              t.off('test', callback, fakeCtx);
-              expect(t.events['test'].length).to.be(2);
+                expect(t.events.test.length).to.be(4);
 
-              t.off('test', callback, this);
-              expect(t.events['test'].length).to.be(0);
+                t.off('test', callback, fakeCtx);
+                expect(t.events.test.length).to.be(2);
+
+                t.off('test', callback);
+                expect(t.events.test.length).to.be(0);
 
             });
 
