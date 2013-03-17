@@ -52,8 +52,8 @@ SOFTWARE.
         // This method, and its alias `bind`, are used to register callbacks
         // to a particular event.
         //
-        // Event callbacks passed no parameters. If callbacks should run
-        // in a special context, and object instance for example, then
+        // Event callbacks are passed no parameters. If callbacks should run
+        // in a special context, an object instance for example, then
         // a reference to the context should be passed in as an optional
         // third argument. In the absence of a special context a default,
         // empty context is used.
@@ -157,11 +157,11 @@ SOFTWARE.
             var x,
                 callback,
                 context,
-                callWIthContext;
+                callWithContext;
 
             // This special scope is used to ensure that function executed
             // asynchronously are done so with the appropriate context.
-            callWIthContext = function (fn, ctx) {
+            callWithContext = function (fn, ctx) {
 
                 return function () {
 
@@ -180,7 +180,7 @@ SOFTWARE.
 
                 if (typeof callback === "function") {
 
-                    defer(callWIthContext(callback, context));
+                    defer(callWithContext(callback, context));
 
                 }
 
