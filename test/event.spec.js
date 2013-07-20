@@ -8,7 +8,7 @@
         def = factory.def,
         deps = {
             amd: ['lib/expect', '../event/node_modules/modelo/modelo.js', '../event/event'],
-            node: ['./lib/expect', '../event/node_modules/modelo/modelo.js', '../event/event.js'],
+            node: ['./lib/expect', 'modelo', '../event/event.js'],
             browser: ['expect', 'Modelo', 'Event']
         };
 
