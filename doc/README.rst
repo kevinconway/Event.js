@@ -127,7 +127,7 @@ on(event, callback[, context])
 
 *Aliases: bind*
 
-The `on` function is used to register callbacks to object events. The argument
+The `on` function is used to register callbacks to object events. The arguments
 it accepts are:
 
 -   event
@@ -147,8 +147,8 @@ off(event[, callback[, context]])
 
 *Aliases: unbind*
 
-The `off` function is used to unregister callbacks to object events. The argument
-it accepts are:
+The `off` function is used to unregister callbacks to object events. The
+arguments it accepts are:
 
 -   event
 
@@ -162,7 +162,8 @@ it accepts are:
 
     A reference to the original context given to the `on` function.
 
-Calling `off` with only the event name will remove all callbacks for that event.
+Calling `off` with only the event name will remove all callbacks for that
+event.
 
 Calling `off` with the event and a callback reference will only remove the
 specified callback from the event.
@@ -176,6 +177,6 @@ trigger(event)
 
 *Aliases: fire*
 
-The `trigger` function results in all callbacks for the given event to be
+The `trigger` function results in all callbacks for the given event being
 executed at the next available event cycle. There is no guaranteed execution
 order of callbacks.
