@@ -4,7 +4,9 @@ Event.js
 
 **Cross platform, asynchronous events for JavaScript.**
 
-*Status: Stable*
+.. image:: https://travis-ci.org/kevinconway/Event.js.png?branch=master
+    :target: https://travis-ci.org/kevinconway/Event.js
+    :alt: Current Build Status
 
 What Is Event?
 ===============
