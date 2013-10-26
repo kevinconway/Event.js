@@ -43,7 +43,7 @@ SOFTWARE.
         // events. While new instances of Event can be created directly, it
         // is intended as more of a Mix-In object that can be added to any
         // inheritance chain.
-        EventMixin = Modelo.define(function (options) {
+        EventMixin = Modelo.define(function () {
 
             this.events = {};
 
@@ -60,7 +60,9 @@ SOFTWARE.
         EventMixin.prototype.on = function (event, callback, context) {
 
             if (typeof callback !== "function") {
+
                 return this;
+
             }
 
             context = context || null;
@@ -81,10 +83,10 @@ SOFTWARE.
         // a callback from an event. This method uses a four-way logic
         // to determine which callbacks to remove.
         //
-        // If no arguments are arguments are passed in then all callback
-        // for all events are unregistered.
+        // If no arguments are passed in then all callbacks for all events are
+        // unregistered.
         //
-        // If an event is the only argument then all callbacks for that
+        // If an event is the only argument given then all callbacks for that
         // event are unregistered.
         //
         // If an event and a reference to a callback are given then all
@@ -96,7 +98,7 @@ SOFTWARE.
         // from the event.
         //
         // It all depends on how specific you really need to be when
-        // removing call backs from an object.
+        // removing callbacks from an object.
         EventMixin.prototype.off = function (event, callback, context) {
 
             var x;
@@ -245,7 +247,7 @@ SOFTWARE.
 
                 }
 
-                module.exports = mod.apply(this, dep_list);
+                module.exports = mod.apply(ctx, dep_list);
 
             };
 
@@ -258,7 +260,7 @@ SOFTWARE.
             return function (name, deps, mod) {
 
                 var namespaces = name.split('/'),
-                    root = this,
+                    root = ctx,
                     dep_list = [],
                     current_scope,
                     current_dep,
@@ -272,7 +274,8 @@ SOFTWARE.
 
                     for (x = 0; x < current_dep.length; x = x + 1) {
 
-                        current_scope = current_scope[current_dep[x]] || {};
+                        current_scope = current_scope[current_dep[x]] =
+                                        current_scope[current_dep[x]] || {};
 
                     }
 
@@ -283,11 +286,12 @@ SOFTWARE.
                 current_scope = root;
                 for (i = 1; i < namespaces.length; i = i + 1) {
 
-                    current_scope = current_scope[namespaces[i - 1]] || {};
+                    current_scope = current_scope[namespaces[i - 1]] =
+                                    current_scope[namespaces[i - 1]] || {};
 
                 }
 
-                current_scope[namespaces[i - 1]] = mod.apply(this, dep_list);
+                current_scope[namespaces[i - 1]] = mod.apply(ctx, dep_list);
 
             };
 

@@ -18,7 +18,7 @@ Show Me
 ::
 
     var Person = Event.extend(),
-        somePerson = new Person;
+        somePerson = new Person();
 
     somePerson.on("birthday", function () { console.log("Happy B-Day."); })
 
@@ -33,11 +33,11 @@ Setup Instructions
 ==================
 
 This library is designed to operate in multiple JavaScript environments without
-requiring change to the code base. To accomplish this, all modules have been
+requiring changes to the code base. To accomplish this, all modules have been
 wrapped in a specialized module pattern that will detect the current
 environment and choose the most appropriate loading mechanism for dependencies.
 
-Currently support platforms are Node.js, browser via <script>, and AMD via
+Currently supported platforms are Node.js, browser via <script>, and AMD via
 RequireJS.
 
 Node.js
@@ -107,12 +107,12 @@ This project is released and distributed under an MIT License.
 
     Copyright (C) 2013 Kevin Conway
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to
-    deal in the Software without restriction, including without limitation the
-    rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-    sell copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
 
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
@@ -122,8 +122,8 @@ This project is released and distributed under an MIT License.
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-    IN THE SOFTWARE.
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 
 Contributors
 ============
