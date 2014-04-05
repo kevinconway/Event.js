@@ -16,7 +16,7 @@ Usage Examples
 Adding asynchronous events to custom Modelo objects is as simple as adding the
 Event object to the inheritance chain::
 
-    var Person = Modelo.define(Event, function (options) {
+    var Person = Modelo.define(eventjs, function (options) {
 
         this.name = options.name || "Juan Pérez";
 
@@ -24,7 +24,7 @@ Event object to the inheritance chain::
 
 Alternatively, the Event object may be extended directly::
 
-    var Person = Event.extend(function (options) {
+    var Person = eventjs.extend(function (options) {
 
         this.name = options.name || "Juan Pérez";
 
@@ -44,7 +44,7 @@ developer. The Event object, itself, supports any event needed.
 
     var Person, myPerson;
 
-    Person = Modelo.define(Event, function (options) {
+    Person = Modelo.define(eventjs, function (options) {
 
         this.name = options.name || "Juan Pérez";
 
@@ -73,7 +73,7 @@ Removing event callbacks is virtually identical to creating them::
 
     var Person, myPerson;
 
-    Person = Modelo.define(Event, function (options) {
+    Person = Modelo.define(eventjs, function (options) {
 
         this.name = options.name || "Juan Pérez";
 
@@ -107,17 +107,17 @@ Exports
 -------
 
 This module exports a single Modelo object that can be used as is, extended
-directly, or mixed into other Modelo objects. In a Node.js or AMD environment
-the object can simply be required::
+directly, or mixed into other Modelo objects. In a Node.js environment the
+object can simply be required::
 
     var Event = require('eventjs');
 
     typeof Event.extend === "function"; // true
 
-In a browser environment, the package is exposed under the global `Event`
+In a browser environment, the package is exposed under the global `eventjs`
 variable::
 
-    typeof Event.extend === "function"; // true
+    typeof eventjs.extend === "function"; // true
 
 All instances of objects inheriting from the Event object gain a standard set
 of event handling functionality.

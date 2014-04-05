@@ -21,291 +21,254 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*global require, define, module
+/*jslint node: true, indent: 2, passfail: true */
 
-*/
-(function (ctx, factory) {
-    "use strict";
+(function (context, generator) {
+  "use strict";
 
-    var env = factory.env,
-        def = factory.def,
-        deps = {
-            amd: ['./node_modules/modelo/modelo.js', './node_modules/deferjs/defer.js'],
-            node: ['modelo', 'deferjs'],
-            browser: ['Modelo', 'defer']
-        };
+  generator.call(
+    context,
+    'eventjs',
+    ['modelo', 'deferjs'],
+    function (Modelo, defer) {
 
-    def.call(ctx, 'Event', deps[env], function (Modelo, defer) {
+      var EventMixin;
 
-        var EventMixin;
+      // The Event object is a Modelo object that provides asynchronous
+      // events. While new instances of Event can be created directly, it
+      // is intended as more of a Mix-In object that can be added to any
+      // inheritance chain.
+      EventMixin = Modelo.define(function () {
 
-        // The Event object is a Modelo object that provides asynchronous
-        // events. While new instances of Event can be created directly, it
-        // is intended as more of a Mix-In object that can be added to any
-        // inheritance chain.
-        EventMixin = Modelo.define(function () {
+        this.events = {};
 
-            this.events = {};
+      });
 
-        });
+      // This method, and its alias `bind`, are used to register callbacks
+      // to a particular event.
+      //
+      // Event callbacks are passed no parameters. If callbacks should run
+      // in a special context, an object instance for example, then
+      // a reference to the context should be passed in as an optional
+      // third argument. In the absence of a special context a default,
+      // empty context is used.
+      EventMixin.prototype.on = function (event, callback, context) {
 
-        // This method, and its alias `bind`, are used to register callbacks
-        // to a particular event.
-        //
-        // Event callbacks are passed no parameters. If callbacks should run
-        // in a special context, an object instance for example, then
-        // a reference to the context should be passed in as an optional
-        // third argument. In the absence of a special context a default,
-        // empty context is used.
-        EventMixin.prototype.on = function (event, callback, context) {
+        if (typeof callback !== "function") {
 
-            if (typeof callback !== "function") {
-
-                return this;
-
-            }
-
-            context = context || null;
-
-            this.events[event] = this.events[event] || [];
-
-            this.events[event].push({
-                "callback": callback,
-                "context": context
-            });
-
-            return this;
-
-        };
-        EventMixin.prototype.bind = EventMixin.prototype.on;
-
-        // This method, and its alias `unbind`, are used to unregister
-        // a callback from an event. This method uses a four-way logic
-        // to determine which callbacks to remove.
-        //
-        // If no arguments are passed in then all callbacks for all events are
-        // unregistered.
-        //
-        // If an event is the only argument given then all callbacks for that
-        // event are unregistered.
-        //
-        // If an event and a reference to a callback are given then all
-        // callbacks that equal the reference are removed from the specified
-        // event.
-        //
-        // If an event, callback reference, and context reference are given
-        // then only the callbacks that match both references are removed
-        // from the event.
-        //
-        // It all depends on how specific you really need to be when
-        // removing callbacks from an object.
-        EventMixin.prototype.off = function (event, callback, context) {
-
-            var x;
-
-            if (callback === undefined &&
-                    context === undefined &&
-                    event === undefined) {
-
-                this.events = {};
-                return this;
-
-            }
-
-            if (callback === undefined && context === undefined) {
-
-                this.events[event].splice(0, this.events[event].length);
-                return this;
-
-            }
-
-            if (context === undefined) {
-
-                for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-                    if (this.events[event][x].callback === callback) {
-
-                        this.events[event].splice(x, 1);
-
-                    }
-
-                }
-
-                return this;
-
-            }
-
-            for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-                if (this.events[event][x].callback === callback &&
-                        this.events[event][x].context === context) {
-
-                    this.events[event].splice(x, 1);
-
-                }
-
-            }
-
-            return this;
-
-        };
-        EventMixin.prototype.unbind = EventMixin.prototype.off;
-
-        // This method, and its alias `fire`, are used to start the execution
-        // of callbacks attached to an event. All callbacks are deferred using
-        // the defer.js module and are not guaranteed an execution order.
-        EventMixin.prototype.trigger = function (event) {
-
-            var x,
-                callback,
-                context,
-                callWithContext;
-
-            // This special scope is used to ensure that function executed
-            // asynchronously are done so with the appropriate context.
-            callWithContext = function (fn, ctx) {
-
-                return function () {
-
-                    fn.call(ctx);
-
-                };
-
-            };
-
-            this.events[event] = this.events[event] || [];
-
-            for (x = 0; x < this.events[event].length; x = x + 1) {
-
-                callback = this.events[event][x].callback;
-                context = this.events[event][x].context;
-
-                if (typeof callback === "function") {
-
-                    defer(callWithContext(callback, context));
-
-                }
-
-            }
-
-            return this;
-
-        };
-        EventMixin.prototype.fire = EventMixin.prototype.trigger;
-
-
-        return EventMixin;
-
-    });
-
-}(this, (function (ctx) {
-    "use strict";
-
-    var currentEnvironment,
-        generator;
-
-    // Check the environment to determine the dependency management strategy.
-
-    if (typeof define === "function" && !!define.amd) {
-
-        currentEnvironment = 'amd';
-
-    } else if (typeof require === "function" &&
-                        module !== undefined && !!module.exports) {
-
-        currentEnvironment = 'node';
-
-    } else if (ctx.window !== undefined) {
-
-        currentEnvironment = 'browser';
-
-    }
-
-    generator = (function () {
-        switch (currentEnvironment) {
-
-        case 'amd':
-
-            // If RequireJS is used to load this module then return the global
-            // define() function.
-            return function (name, deps, mod) {
-                define(deps, mod);
-            };
-
-        case 'node':
-
-            // If this module is loaded in Node, require each of the
-            // dependencies and pass them along.
-            return function (name, deps, mod) {
-
-                var x,
-                    dep_list = [];
-
-                for (x = 0; x < deps.length; x = x + 1) {
-
-                    dep_list.push(require(deps[x]));
-
-                }
-
-                module.exports = mod.apply(ctx, dep_list);
-
-            };
-
-        case 'browser':
-
-            // If this module is being used in a browser environment first
-            // generate a list of dependencies, run the provided definition
-            // function with the list of dependencies, and insert the returned
-            // object into the global namespace using the provided module name.
-            return function (name, deps, mod) {
-
-                var namespaces = name.split('/'),
-                    root = ctx,
-                    dep_list = [],
-                    current_scope,
-                    current_dep,
-                    i,
-                    x;
-
-                for (i = 0; i < deps.length; i = i + 1) {
-
-                    current_scope = root;
-                    current_dep = deps[i].split('/');
-
-                    for (x = 0; x < current_dep.length; x = x + 1) {
-
-                        current_scope = current_scope[current_dep[x]] =
-                                        current_scope[current_dep[x]] || {};
-
-                    }
-
-                    dep_list.push(current_scope);
-
-                }
-
-                current_scope = root;
-                for (i = 1; i < namespaces.length; i = i + 1) {
-
-                    current_scope = current_scope[namespaces[i - 1]] =
-                                    current_scope[namespaces[i - 1]] || {};
-
-                }
-
-                current_scope[namespaces[i - 1]] = mod.apply(ctx, dep_list);
-
-            };
-
-        default:
-            throw new Error("Unrecognized environment.");
+          return this;
 
         }
 
-    }());
+        context = context || null;
+
+        this.events[event] = this.events[event] || [];
+
+        this.events[event].push({
+          "callback": callback,
+          "context": context
+        });
+
+        return this;
+
+      };
+      EventMixin.prototype.bind = EventMixin.prototype.on;
+
+      // This method, and its alias `unbind`, are used to unregister
+      // a callback from an event. This method uses a four-way logic
+      // to determine which callbacks to remove.
+      //
+      // If no arguments are passed in then all callbacks for all events are
+      // unregistered.
+      //
+      // If an event is the only argument given then all callbacks for that
+      // event are unregistered.
+      //
+      // If an event and a reference to a callback are given then all
+      // callbacks that equal the reference are removed from the specified
+      // event.
+      //
+      // If an event, callback reference, and context reference are given
+      // then only the callbacks that match both references are removed
+      // from the event.
+      //
+      // It all depends on how specific you really need to be when
+      // removing callbacks from an object.
+      EventMixin.prototype.off = function (event, callback, context) {
+
+        var x;
+
+        if (callback === undefined &&
+              context === undefined &&
+              event === undefined) {
+
+          this.events = {};
+          return this;
+
+        }
+
+        if (callback === undefined && context === undefined) {
+
+          this.events[event].splice(0, this.events[event].length);
+          return this;
+
+        }
+
+        if (context === undefined) {
+
+          for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
+
+            if (this.events[event][x].callback === callback) {
+
+              this.events[event].splice(x, 1);
+
+            }
+
+          }
+
+          return this;
+
+        }
+
+        for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
+
+          if (this.events[event][x].callback === callback &&
+                this.events[event][x].context === context) {
+
+            this.events[event].splice(x, 1);
+
+          }
+
+        }
+
+        return this;
+
+      };
+      EventMixin.prototype.unbind = EventMixin.prototype.off;
+
+      // This method, and its alias `fire`, are used to start the execution
+      // of callbacks attached to an event. All callbacks are deferred using
+      // the defer.js module and are not guaranteed an execution order.
+      EventMixin.prototype.trigger = function (event) {
+
+        var x,
+          callback,
+          ctx,
+          callWithContext;
+
+        // This special scope is used to ensure that function executed
+        // asynchronously are done so with the appropriate context.
+        callWithContext = function (fn, ctx) {
+
+          return function () {
+
+            fn.call(ctx);
+
+          };
+
+        };
+
+        this.events[event] = this.events[event] || [];
+
+        for (x = 0; x < this.events[event].length; x = x + 1) {
+
+          callback = this.events[event][x].callback;
+          ctx = this.events[event][x].ctx;
+
+          if (typeof callback === "function") {
+
+            defer(callWithContext(callback, ctx));
+
+          }
+
+        }
+
+        return this;
+
+      };
+      EventMixin.prototype.fire = EventMixin.prototype.trigger;
 
 
-    return {
-        env: currentEnvironment,
-        def: generator
+      return EventMixin;
+
+    }
+  );
+
+}(this, (function (context) {
+  "use strict";
+
+  // Ignoring the unused "name" in the Node.js definition function.
+  /*jslint unparam: true */
+  if (typeof require === "function" &&
+        module !== undefined &&
+        !!module.exports) {
+
+    // If this module is loaded in Node, require each of the
+    // dependencies and pass them along.
+    return function (name, deps, mod) {
+
+      var x,
+        dep_list = [];
+
+      for (x = 0; x < deps.length; x = x + 1) {
+
+        dep_list.push(require(deps[x]));
+
+      }
+
+      module.exports = mod.apply(context, dep_list);
+
     };
+
+  }
+  /*jslint unparam: false */
+
+  if (context.window !== undefined) {
+
+    // If this module is being used in a browser environment first
+    // generate a list of dependencies, run the provided definition
+    // function with the list of dependencies, and insert the returned
+    // object into the global namespace using the provided module name.
+    return function (name, deps, mod) {
+
+      var namespaces = name.split('/'),
+        root = context,
+        dep_list = [],
+        current_scope,
+        current_dep,
+        i,
+        x;
+
+      for (i = 0; i < deps.length; i = i + 1) {
+
+        current_scope = root;
+        current_dep = deps[i].split('/');
+
+        for (x = 0; x < current_dep.length; x = x + 1) {
+
+          current_scope = current_scope[current_dep[x]] =
+                          current_scope[current_dep[x]] || {};
+
+        }
+
+        dep_list.push(current_scope);
+
+      }
+
+      current_scope = root;
+      for (i = 1; i < namespaces.length; i = i + 1) {
+
+        current_scope = current_scope[namespaces[i - 1]] =
+                        current_scope[namespaces[i - 1]] || {};
+
+      }
+
+      current_scope[namespaces[i - 1]] = mod.apply(context, dep_list);
+
+    };
+
+  }
+
+  throw new Error("Unrecognized environment.");
 
 }(this))));
