@@ -10,11 +10,11 @@
   },
   "main": "./event/event.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./test/install_libs && mocha"
   },
   "dependencies": {
-    "modelo": "1.x.x",
-    "deferjs": "1.x.x"
+    "modelo": "3.x.x",
+    "deferjs": "2.x.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
