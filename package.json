@@ -2,7 +2,7 @@
   "author": "Kevin Conway <kevinjacobconway@gmail.com> (https://github.com/kevinconway)",
   "name": "eventjs",
   "description": "Cross platform, asynchronous events for JavaScript.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://github.com/kevinconway/Event.js",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "modelo": "3.x.x",
-    "deferjs": "2.x.x"
+    "deferjs": ">=2.1.x <3.0.0"
   },
   "devDependencies": {},
   "optionalDependencies": {},
