@@ -153,31 +153,18 @@ SOFTWARE.
 
         var x,
           callback,
-          ctx,
-          callWithContext;
-
-        // This special scope is used to ensure that function executed
-        // asynchronously are done so with the appropriate context.
-        callWithContext = function (fn, ctx) {
-
-          return function () {
-
-            fn.call(ctx);
-
-          };
-
-        };
+          ctx;
 
         this.events[event] = this.events[event] || [];
 
         for (x = 0; x < this.events[event].length; x = x + 1) {
 
           callback = this.events[event][x].callback;
-          ctx = this.events[event][x].ctx;
+          ctx = this.events[event][x].context;
 
           if (typeof callback === "function") {
 
-            defer(callWithContext(callback, ctx));
+            defer(defer.bind(callback, ctx));
 
           }
 

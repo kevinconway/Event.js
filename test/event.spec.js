@@ -45,6 +45,25 @@
 
         });
 
+        it('executes callbacks in the correct context', function (done) {
+
+          var t = new EventMixin(),
+            test_value = {};
+
+          t.on('test', function () {
+            this.test = true;
+            expect(test_value.test).to.be(true);
+            done();
+          }, test_value);
+
+          expect(test_value.test).to.be(undefined);
+
+          t.trigger('test');
+
+          expect(test_value.test).to.be(undefined);
+
+        });
+
         it('removes events', function (done) {
 
           var t = new EventMixin(),
