@@ -14,108 +14,216 @@ describe('Event.js', function () {
 
   });
 
-  it('exposes a specification compliant interface', function () {
+  describe('The addListener method', function () {
 
-    expect(typeof EventMixin).to.be("function");
+    it('creates a listener array', function () {
 
-    expect(typeof EventMixin.extend).to.be("function");
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(e.events.test).to.be.ok();
+      expect(e.events.test.length).to.be(1);
 
-  });
-
-  it('registers and triggers events', function (done) {
-
-    var t = new EventMixin(),
-      test_value = {};
-
-    t.on('test', function () {
-      test_value.test = true;
-      expect(test_value.test).to.be(true);
-      done();
     });
 
-    expect(test_value.test).to.be(undefined);
+    it('return emitter', function () {
 
-    t.trigger('test');
+      var e = new EventMixin(),
+        reference;
 
-    expect(test_value.test).to.be(undefined);
+      reference = e.addListener('test', function () { return null; });
+      expect(reference).to.be(e);
 
-  });
+    });
 
-  it('executes callbacks in the correct context', function (done) {
+    it('emits a newListener event', function (done) {
 
-    var t = new EventMixin(),
-      test_value = {};
+      var e = new EventMixin();
+      e.addListener('newListener', function () { done(); });
 
-    t.on('test', function () {
-      this.test = true;
-      expect(test_value.test).to.be(true);
-      done();
-    }, test_value);
+    });
 
-    expect(test_value.test).to.be(undefined);
+    it('adds listeners that are called more than once', function () {
 
-    t.trigger('test');
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(e.events.test[0].once).to.be(false);
 
-    expect(test_value.test).to.be(undefined);
+    });
 
-  });
+    it('is aliased by the on method', function () {
 
-  it('removes events', function (done) {
+      expect(EventMixin.prototype.on).to.be(EventMixin.prototype.addListener);
 
-    var t = new EventMixin(),
-      test_value = {},
-      callback = function () {
-        test_value.test = true;
-        expect(test_value.test).to.be(true);
-
-        t.off('test', callback);
-
-        expect(test_value.test).to.be(true);
-
-        test_value.test = false;
-
-        expect(test_value.test).to.be(false);
-
-        t.on('test', function () {
-
-          expect(test_value.test).to.be(false);
-
-          done();
-
-        });
-
-        t.trigger('test');
-
-      };
-
-    t.on('test', callback);
-
-    expect(test_value.test).to.be(undefined);
-
-    t.trigger('test');
-
-    expect(test_value.test).to.be(undefined);
+    });
 
   });
 
-  it('removes events of the same callback but different context correctly', function () {
+  describe('The once method', function () {
 
-    var t = new EventMixin(),
-      callback = function () { return null; },
-      fakeCtx = function () { return null; };
+    it('creates a listener array', function () {
 
-    t.on('test', callback, fakeCtx);
-    t.on('test', callback, fakeCtx);
-    t.on('test', callback);
-    t.on('test', callback);
+      var e = new EventMixin();
+      e.once('test', function () { return null; });
+      expect(e.events.test).to.be.ok();
+      expect(e.events.test.length).to.be(1);
 
-    expect(t.events.test.length).to.be(4);
+    });
 
-    t.off('test', callback, fakeCtx);
-    expect(t.events.test.length).to.be(2);
+    it('return emitter', function () {
 
-    t.off('test', callback);
-    expect(t.events.test.length).to.be(0);
+      var e = new EventMixin(),
+        reference;
+
+      reference = e.once('test', function () { return null; });
+      expect(reference).to.be(e);
+
+    });
+
+    it('emits a newListener event', function (done) {
+
+      var e = new EventMixin();
+      e.once('newListener', function () { done(); });
+
+    });
+
+    it('adds listeners that are called only once', function () {
+
+      var e = new EventMixin();
+      e.once('test', function () { return null; });
+      expect(e.events.test[0].once).to.be(true);
+
+    });
+
+  });
+
+  describe('The removeListener method', function () {
+
+    it('removes a listener from an array', function () {
+
+      var e = new EventMixin(),
+        noop = function () { return null; };
+      e.addListener('test', noop);
+      e.removeListener('test', noop);
+      expect(e.events.test.length).to.be(0);
+
+    });
+
+    it('emits the removeListener event', function (done) {
+
+      var e = new EventMixin(),
+        noop = function () { return null; };
+      e.addListener('test', noop);
+      e.addListener('removeListener', function () { done(); });
+      e.removeListener('test', noop);
+
+    });
+
+    it('does not remove all listeners by accident', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test', function () { return null; });
+      e.removeListener('test');
+      expect(e.events.test.length).to.be(2);
+
+    });
+
+  });
+
+  describe('The removeAllEvents method', function () {
+
+    it('removes all listeners for an event', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test', function () { return null; });
+      e.removeAllListeners('test');
+      expect(e.events.test.length).to.be(0);
+
+    });
+
+    it('does not remove listeners for untargetd events', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test2', function () { return null; });
+      e.removeAllListeners('test');
+      expect(e.events.test2.length).to.be(1);
+
+    });
+
+    it('removes all listeners when no event given', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test2', function () { return null; });
+      e.removeAllListeners();
+      expect(e.events.test.length).to.be(0);
+      expect(e.events.test2.length).to.be(0);
+
+    });
+
+  });
+
+  describe('The listeners method', function () {
+
+    it('returns an array of listeners', function () {
+
+      var e = new EventMixin(),
+        noop = function () { return null; },
+        listeners;
+
+      e.addListener('test', noop);
+      listeners = e.listeners('test');
+      expect(listeners[0]).to.be(noop);
+
+    });
+
+  });
+
+  describe('The emit method', function () {
+
+    it('triggers listeners more than once', function (done) {
+
+      var e = new EventMixin(),
+        state = {"count": 0};
+      e.addListener('test', function () { state.count = state.count + 1; });
+      e.addListener('done', function () {
+        expect(state.count).to.be(2);
+        done();
+      });
+      e.emit('test');
+      e.emit('test');
+      e.emit('done');
+
+    });
+
+    it('only triggers once listeners once', function (done) {
+
+      var e = new EventMixin(),
+        state = {"count": 0};
+      e.once('test', function () { state.count = state.count + 1; });
+      e.once('done', function () {
+        expect(state.count).to.be(1);
+        done();
+      });
+      e.emit('test');
+      e.emit('test');
+      e.emit('done');
+
+    });
+
+  });
+
+  describe('The listenerCount method', function () {
+
+    it('return the listener count', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(EventMixin.listenerCount(e, 'test')).to.be(1);
+
+    });
 
   });
 

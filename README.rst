@@ -2,7 +2,7 @@
 Event.js
 ========
 
-**Cross platform, asynchronous events for JavaScript.**
+**Cross platform, asynchronous EventEmitter.**
 
 .. image:: https://travis-ci.org/kevinconway/Event.js.png?branch=master
     :target: https://travis-ci.org/kevinconway/Event.js
@@ -11,8 +11,11 @@ Event.js
 What Is Event?
 ===============
 
-Event.js is a Modelo.js mix-in object that adds asynchronous event handling to
-JavaScript objects.
+Event.js is an implementation of the EventEmitter API that works in both
+Node.js and the browser. It should be compatible with every JavaScript
+inheritance utility (such as util.inherits). Alternatively, it also has its
+own inheritance utilities built in powered by
+`Modelo.js <https://github.com/kevinconway/Modelo.js>`_.
 
 Show Me
 =======
@@ -24,12 +27,13 @@ Show Me
 
     somePerson.on("birthday", function () { console.log("Happy B-Day."); })
 
-    somPerson.trigger("birthday");
+    somPerson.emit("birthday");
 
     // At some point later:
     // Console Output: "Happy B-Day."
 
-For more detailed usage guides and API specifications, see the docs directory.
+For more detailed usage guides and API specifications, see the
+`official EventEmitter documentation <http://nodejs.org/api/events.html>`_.
 
 Setup
 =====
@@ -46,29 +50,20 @@ Once installed, simply `Event = require("eventjs")`.
 Browser
 -------
 
-Developers working with a normal browser environment can use regular script
-tags to load the package. This package has dependencies on these other
-packages:
+This module uses browserify to create a browser compatible module. The default
+grunt workflow for this project will generate both a full and minified browser
+script in a build directory which can be included as a <script> tag::
 
--   `Modelo <https://github.com/kevinconway/Modelo.js>`_
+    <script src="event.browser.min.js"></script>
 
--   `Defer <https://github.com/kevinconway/Defer.js>`_
-
-The load order should be something like this::
-
-    <script src="modelo.js"></script>
-    <script src="defer.js"></script>
-    <script src="event.js"></script>
-
-The package loads into a global variable named `eventjs`.
+The package is exposed via the global name `eventjs`.
 
 Tests
 -----
 
-To run the tests in Node.js use the `npm test` command.
-
-To run the tests in a browser, run the `install_libs` script in the test
-directory and then open the `runner.html` in the browser of your choice.
+Running the `npm test` command will kick off the default grunt workflow. This
+will lint using jslint, run the mocha/expect tests, generate a browser module,
+and test the browser module using PhantomJS.
 
 License
 =======
