@@ -22,240 +22,156 @@ SOFTWARE.
 */
 
 /*jslint node: true, indent: 2, passfail: true */
+"use strict";
 
-(function (context, generator) {
-  "use strict";
+module.exports = (function () {
 
-  generator.call(
-    context,
-    'eventjs',
-    ['modelo', 'deferjs'],
-    function (Modelo, defer) {
+  var Modelo = require('modelo'),
+    defer = require('deferjs'),
+    EventMixin;
 
-      var EventMixin;
+  // The Event object is a Modelo object that provides asynchronous
+  // events. While new instances of Event can be created directly, it
+  // is intended as more of a Mix-In object that can be added to any
+  // inheritance chain.
+  EventMixin = Modelo.define(function () {
 
-      // The Event object is a Modelo object that provides asynchronous
-      // events. While new instances of Event can be created directly, it
-      // is intended as more of a Mix-In object that can be added to any
-      // inheritance chain.
-      EventMixin = Modelo.define(function () {
+    this.events = {};
 
-        this.events = {};
+  });
 
-      });
+  // This method, and its alias `bind`, are used to register callbacks
+  // to a particular event.
+  //
+  // Event callbacks are passed no parameters. If callbacks should run
+  // in a special context, an object instance for example, then
+  // a reference to the context should be passed in as an optional
+  // third argument. In the absence of a special context a default,
+  // empty context is used.
+  EventMixin.prototype.on = function (event, callback, context) {
 
-      // This method, and its alias `bind`, are used to register callbacks
-      // to a particular event.
-      //
-      // Event callbacks are passed no parameters. If callbacks should run
-      // in a special context, an object instance for example, then
-      // a reference to the context should be passed in as an optional
-      // third argument. In the absence of a special context a default,
-      // empty context is used.
-      EventMixin.prototype.on = function (event, callback, context) {
+    if (typeof callback !== "function") {
 
-        if (typeof callback !== "function") {
-
-          return this;
-
-        }
-
-        context = context || null;
-
-        this.events[event] = this.events[event] || [];
-
-        this.events[event].push({
-          "callback": callback,
-          "context": context
-        });
-
-        return this;
-
-      };
-      EventMixin.prototype.bind = EventMixin.prototype.on;
-
-      // This method, and its alias `unbind`, are used to unregister
-      // a callback from an event. This method uses a four-way logic
-      // to determine which callbacks to remove.
-      //
-      // If no arguments are passed in then all callbacks for all events are
-      // unregistered.
-      //
-      // If an event is the only argument given then all callbacks for that
-      // event are unregistered.
-      //
-      // If an event and a reference to a callback are given then all
-      // callbacks that equal the reference are removed from the specified
-      // event.
-      //
-      // If an event, callback reference, and context reference are given
-      // then only the callbacks that match both references are removed
-      // from the event.
-      //
-      // It all depends on how specific you really need to be when
-      // removing callbacks from an object.
-      EventMixin.prototype.off = function (event, callback, context) {
-
-        var x;
-
-        if (callback === undefined &&
-              context === undefined &&
-              event === undefined) {
-
-          this.events = {};
-          return this;
-
-        }
-
-        if (callback === undefined && context === undefined) {
-
-          this.events[event].splice(0, this.events[event].length);
-          return this;
-
-        }
-
-        if (context === undefined) {
-
-          for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-            if (this.events[event][x].callback === callback) {
-
-              this.events[event].splice(x, 1);
-
-            }
-
-          }
-
-          return this;
-
-        }
-
-        for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-          if (this.events[event][x].callback === callback &&
-                this.events[event][x].context === context) {
-
-            this.events[event].splice(x, 1);
-
-          }
-
-        }
-
-        return this;
-
-      };
-      EventMixin.prototype.unbind = EventMixin.prototype.off;
-
-      // This method, and its alias `fire`, are used to start the execution
-      // of callbacks attached to an event. All callbacks are deferred using
-      // the defer.js module and are not guaranteed an execution order.
-      EventMixin.prototype.trigger = function (event) {
-
-        var x,
-          callback,
-          ctx;
-
-        this.events[event] = this.events[event] || [];
-
-        for (x = 0; x < this.events[event].length; x = x + 1) {
-
-          callback = this.events[event][x].callback;
-          ctx = this.events[event][x].context;
-
-          if (typeof callback === "function") {
-
-            defer(defer.bind(callback, ctx));
-
-          }
-
-        }
-
-        return this;
-
-      };
-      EventMixin.prototype.fire = EventMixin.prototype.trigger;
-
-
-      return EventMixin;
+      return this;
 
     }
-  );
 
-}(this, (function (context) {
-  "use strict";
+    context = context || null;
 
-  // Ignoring the unused "name" in the Node.js definition function.
-  /*jslint unparam: true */
-  if (typeof require === "function" &&
-        module !== undefined &&
-        !!module.exports) {
+    this.events[event] = this.events[event] || [];
 
-    // If this module is loaded in Node, require each of the
-    // dependencies and pass them along.
-    return function (name, deps, mod) {
+    this.events[event].push({
+      "callback": callback,
+      "context": context
+    });
 
-      var x,
-        dep_list = [];
+    return this;
 
-      for (x = 0; x < deps.length; x = x + 1) {
+  };
+  EventMixin.prototype.bind = EventMixin.prototype.on;
 
-        dep_list.push(require(deps[x]));
+  // This method, and its alias `unbind`, are used to unregister
+  // a callback from an event. This method uses a four-way logic
+  // to determine which callbacks to remove.
+  //
+  // If no arguments are passed in then all callbacks for all events are
+  // unregistered.
+  //
+  // If an event is the only argument given then all callbacks for that
+  // event are unregistered.
+  //
+  // If an event and a reference to a callback are given then all
+  // callbacks that equal the reference are removed from the specified
+  // event.
+  //
+  // If an event, callback reference, and context reference are given
+  // then only the callbacks that match both references are removed
+  // from the event.
+  //
+  // It all depends on how specific you really need to be when
+  // removing callbacks from an object.
+  EventMixin.prototype.off = function (event, callback, context) {
 
-      }
+    var x;
 
-      module.exports = mod.apply(context, dep_list);
+    if (callback === undefined &&
+          context === undefined &&
+          event === undefined) {
 
-    };
+      this.events = {};
+      return this;
 
-  }
-  /*jslint unparam: false */
+    }
 
-  if (context.window !== undefined) {
+    if (callback === undefined && context === undefined) {
 
-    // If this module is being used in a browser environment first
-    // generate a list of dependencies, run the provided definition
-    // function with the list of dependencies, and insert the returned
-    // object into the global namespace using the provided module name.
-    return function (name, deps, mod) {
+      this.events[event].splice(0, this.events[event].length);
+      return this;
 
-      var namespaces = name.split('/'),
-        root = context,
-        dep_list = [],
-        current_scope,
-        current_dep,
-        i,
-        x;
+    }
 
-      for (i = 0; i < deps.length; i = i + 1) {
+    if (context === undefined) {
 
-        current_scope = root;
-        current_dep = deps[i].split('/');
+      for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
 
-        for (x = 0; x < current_dep.length; x = x + 1) {
+        if (this.events[event][x].callback === callback) {
 
-          current_scope = current_scope[current_dep[x]] =
-                          current_scope[current_dep[x]] || {};
+          this.events[event].splice(x, 1);
 
         }
 
-        dep_list.push(current_scope);
+      }
+
+      return this;
+
+    }
+
+    for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
+
+      if (this.events[event][x].callback === callback &&
+            this.events[event][x].context === context) {
+
+        this.events[event].splice(x, 1);
 
       }
 
-      current_scope = root;
-      for (i = 1; i < namespaces.length; i = i + 1) {
+    }
 
-        current_scope = current_scope[namespaces[i - 1]] =
-                        current_scope[namespaces[i - 1]] || {};
+    return this;
+
+  };
+  EventMixin.prototype.unbind = EventMixin.prototype.off;
+
+  // This method, and its alias `fire`, are used to start the execution
+  // of callbacks attached to an event. All callbacks are deferred using
+  // the defer.js module and are not guaranteed an execution order.
+  EventMixin.prototype.trigger = function (event) {
+
+    var x,
+      callback,
+      ctx;
+
+    this.events[event] = this.events[event] || [];
+
+    for (x = 0; x < this.events[event].length; x = x + 1) {
+
+      callback = this.events[event][x].callback;
+      ctx = this.events[event][x].context;
+
+      if (typeof callback === "function") {
+
+        defer(defer.bind(callback, ctx));
 
       }
 
-      current_scope[namespaces[i - 1]] = mod.apply(context, dep_list);
+    }
 
-    };
+    return this;
 
-  }
+  };
+  EventMixin.prototype.fire = EventMixin.prototype.trigger;
 
-  throw new Error("Unrecognized environment.");
 
-}(this))));
+  return EventMixin;
+
+}());
