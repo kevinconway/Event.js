@@ -21,241 +21,218 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*jslint node: true, indent: 2, passfail: true */
+/*jslint node: true, continue: true, indent: 2, passfail: true */
+"use strict";
 
-(function (context, generator) {
-  "use strict";
+module.exports = (function () {
 
-  generator.call(
-    context,
-    'eventjs',
-    ['modelo', 'deferjs'],
-    function (Modelo, defer) {
+  var Modelo = require('modelo'),
+    defer = require('deferjs'),
+    EventMixin;
 
-      var EventMixin;
+  // Adds a listener to the list.
+  // Private method hidden from api.
+  function appendListener(event, listener, once) {
 
-      // The Event object is a Modelo object that provides asynchronous
-      // events. While new instances of Event can be created directly, it
-      // is intended as more of a Mix-In object that can be added to any
-      // inheritance chain.
-      EventMixin = Modelo.define(function () {
+    this.events[event] = this.events[event] || [];
+    this.events[event].push({
+      "listener": listener,
+      "once": !!once
+    });
 
-        this.events = {};
+    this.emit('newListener', event, listener);
 
-      });
+    if (this.events[event].length > this.maxListeners) {
 
-      // This method, and its alias `bind`, are used to register callbacks
-      // to a particular event.
-      //
-      // Event callbacks are passed no parameters. If callbacks should run
-      // in a special context, an object instance for example, then
-      // a reference to the context should be passed in as an optional
-      // third argument. In the absence of a special context a default,
-      // empty context is used.
-      EventMixin.prototype.on = function (event, callback, context) {
-
-        if (typeof callback !== "function") {
-
-          return this;
-
-        }
-
-        context = context || null;
-
-        this.events[event] = this.events[event] || [];
-
-        this.events[event].push({
-          "callback": callback,
-          "context": context
-        });
-
-        return this;
-
-      };
-      EventMixin.prototype.bind = EventMixin.prototype.on;
-
-      // This method, and its alias `unbind`, are used to unregister
-      // a callback from an event. This method uses a four-way logic
-      // to determine which callbacks to remove.
-      //
-      // If no arguments are passed in then all callbacks for all events are
-      // unregistered.
-      //
-      // If an event is the only argument given then all callbacks for that
-      // event are unregistered.
-      //
-      // If an event and a reference to a callback are given then all
-      // callbacks that equal the reference are removed from the specified
-      // event.
-      //
-      // If an event, callback reference, and context reference are given
-      // then only the callbacks that match both references are removed
-      // from the event.
-      //
-      // It all depends on how specific you really need to be when
-      // removing callbacks from an object.
-      EventMixin.prototype.off = function (event, callback, context) {
-
-        var x;
-
-        if (callback === undefined &&
-              context === undefined &&
-              event === undefined) {
-
-          this.events = {};
-          return this;
-
-        }
-
-        if (callback === undefined && context === undefined) {
-
-          this.events[event].splice(0, this.events[event].length);
-          return this;
-
-        }
-
-        if (context === undefined) {
-
-          for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-            if (this.events[event][x].callback === callback) {
-
-              this.events[event].splice(x, 1);
-
-            }
-
-          }
-
-          return this;
-
-        }
-
-        for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
-
-          if (this.events[event][x].callback === callback &&
-                this.events[event][x].context === context) {
-
-            this.events[event].splice(x, 1);
-
-          }
-
-        }
-
-        return this;
-
-      };
-      EventMixin.prototype.unbind = EventMixin.prototype.off;
-
-      // This method, and its alias `fire`, are used to start the execution
-      // of callbacks attached to an event. All callbacks are deferred using
-      // the defer.js module and are not guaranteed an execution order.
-      EventMixin.prototype.trigger = function (event) {
-
-        var x,
-          callback,
-          ctx;
-
-        this.events[event] = this.events[event] || [];
-
-        for (x = 0; x < this.events[event].length; x = x + 1) {
-
-          callback = this.events[event][x].callback;
-          ctx = this.events[event][x].context;
-
-          if (typeof callback === "function") {
-
-            defer(defer.bind(callback, ctx));
-
-          }
-
-        }
-
-        return this;
-
-      };
-      EventMixin.prototype.fire = EventMixin.prototype.trigger;
-
-
-      return EventMixin;
+      console.warn('warning: possible EventEmitter memory leak detected. ',
+        this.events[event].length, ' listeners added. ',
+        'Use emitter.setMaxListeners() to increase limit. ',
+        this);
 
     }
-  );
 
-}(this, (function (context) {
-  "use strict";
+  }
 
-  // Ignoring the unused "name" in the Node.js definition function.
-  /*jslint unparam: true */
-  if (typeof require === "function" &&
-        module !== undefined &&
-        !!module.exports) {
+  function popListeners(event, listener) {
 
-    // If this module is loaded in Node, require each of the
-    // dependencies and pass them along.
-    return function (name, deps, mod) {
+    var x, removed;
 
-      var x,
-        dep_list = [];
+    this.events[event] = this.events[event] || [];
 
-      for (x = 0; x < deps.length; x = x + 1) {
+    for (x = this.events[event].length - 1; x >= 0; x = x - 1) {
 
-        dep_list.push(require(deps[x]));
+      if (listener !== undefined &&
+          this.events[event][x].listener !== listener) {
+
+        continue;
 
       }
 
-      module.exports = mod.apply(context, dep_list);
+      removed = this.events[event].splice(x, 1);
+      this.emit('removeListener', event, removed);
 
-    };
+    }
 
   }
-  /*jslint unparam: false */
 
-  if (context.window !== undefined) {
+  // The EventMixin object is a Modelo object that provides asynchronous
+  // events. While new instances of EventMixin can be created directly, it
+  // is intended as more of a Mix-In object that can be added to any
+  // inheritance chain.
+  EventMixin = Modelo.define(function () {
 
-    // If this module is being used in a browser environment first
-    // generate a list of dependencies, run the provided definition
-    // function with the list of dependencies, and insert the returned
-    // object into the global namespace using the provided module name.
-    return function (name, deps, mod) {
+    this.events = {};
+    this.maxListeners = 10;
 
-      var namespaces = name.split('/'),
-        root = context,
-        dep_list = [],
-        current_scope,
-        current_dep,
-        i,
-        x;
+  });
 
-      for (i = 0; i < deps.length; i = i + 1) {
+  // Adds a listener to the end of the listeners array for the specified event.
+  // Returns emitter, so calls can be chained.
+  EventMixin.prototype.addListener = function addListener(event, listener) {
 
-        current_scope = root;
-        current_dep = deps[i].split('/');
+    appendListener.call(this, event, listener, false);
+    return this;
 
-        for (x = 0; x < current_dep.length; x = x + 1) {
+  };
+  EventMixin.prototype.on = EventMixin.prototype.addListener;
 
-          current_scope = current_scope[current_dep[x]] =
-                          current_scope[current_dep[x]] || {};
+  EventMixin.prototype.once = function once(event, listener) {
+
+    appendListener.call(this, event, listener, true);
+
+    return this;
+
+  };
+
+  // Remove a listener from the listener array for the specified event.
+  // Returns emitter, so calls can be chained.
+  EventMixin.prototype.removeListener = function removeListener(
+    event,
+    listener
+  ) {
+
+    // Insert empty object for listener when not given to prevent accidental
+    // removal of all listeners.
+    popListeners.call(this, event, listener || {});
+
+    return this;
+
+  };
+
+  // Removes all listeners, or those of the specified event. It's not a good
+  // idea to remove listeners that were added elsewhere in the code, especially
+  // when it's on an emitter that you didn't create.
+  // Returns emitter, so calls can be chained.
+  EventMixin.prototype.removeAllListeners = function removeAllListeners(
+    event
+  ) {
+
+    var k;
+
+    if (event === undefined) {
+
+      for (k in this.events) {
+
+        if (this.events.hasOwnProperty(k)) {
+
+          popListeners.call(this, k);
 
         }
 
-        dep_list.push(current_scope);
+      }
+
+    } else {
+
+      popListeners.call(this, event);
+
+    }
+
+    return this;
+
+  };
+
+  // By default EventEmitters will print a warning if more than 10 listeners
+  // are added for a particular event. This is a useful default which helps
+  // finding memory leaks. Obviously not all Emitters should be limited to 10.
+  // This function allows that to be increased. Set to zero for unlimited.
+  EventMixin.prototype.setMaxListeners = function setMaxListeners(n) {
+
+    this.maxListeners = n;
+
+  };
+
+  // Returns an array of listeners for the specified event.
+  EventMixin.prototype.listeners = function listeners(event) {
+
+    var results = [],
+      x;
+
+    this.events[event] = this.events[event] || [];
+
+    for (x = 0; x < this.events[event].length; x = x + 1) {
+
+      results.push(this.events[event][x].listener);
+
+    }
+
+    return results;
+
+  };
+
+  // Execute each of the listeners in order with the supplied arguments.
+  // Returns true if event had listeners, false otherwise.
+  EventMixin.prototype.emit = function emit(event) {
+
+    var listenerArgs = Array.prototype.slice(arguments, 1),
+      x,
+      numberListeners,
+      remove = [];
+
+    this.events[event] = this.events[event] || [];
+    numberListeners = this.events[event].length;
+
+    function executeListener(listener, args) {
+
+      listener.apply(this, args);
+
+    }
+
+    for (x = 0; x < this.events[event].length; x = x + 1) {
+
+      defer(
+        defer.bind(
+          executeListener,
+          this,
+          this.events[event][x].listener,
+          listenerArgs
+        )
+      );
+
+      if (this.events[event][x].once === true) {
+
+        remove.push(this.events[event][x].listener);
 
       }
 
-      current_scope = root;
-      for (i = 1; i < namespaces.length; i = i + 1) {
+    }
 
-        current_scope = current_scope[namespaces[i - 1]] =
-                        current_scope[namespaces[i - 1]] || {};
+    for (x = 0; x < remove.length; x = x + 1) {
 
-      }
+      this.removeListener(event, remove[x]);
 
-      current_scope[namespaces[i - 1]] = mod.apply(context, dep_list);
+    }
 
-    };
+    return numberListeners > 0;
 
-  }
+  };
 
-  throw new Error("Unrecognized environment.");
+  // Return the number of listeners for a given event.
+  EventMixin.listenerCount = function listenerCount(emitter, event) {
 
-}(this))));
+    return emitter.listeners(event).length;
+
+  };
+
+  return EventMixin;
+
+}());

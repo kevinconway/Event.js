@@ -1,207 +1,231 @@
 /*jslint node: true, indent: 2, passfail: true */
 /*globals describe, it */
 
-(function (context, generator) {
-  "use strict";
+"use strict";
 
-  generator.call(
-    context,
-    'tests/eventjs',
-    ['expect', 'eventjs'],
-    function (expect, EventMixin) {
+var expect = require('expect.js'),
+  EventMixin = require('../event/event.js');
 
-      describe('Event.js', function () {
+describe('Event.js', function () {
 
-        it('loads in the current environment', function () {
+  it('loads in the current environment', function () {
 
-          expect(EventMixin).to.be.ok();
+    expect(EventMixin).to.be.ok();
 
-        });
+  });
 
-        it('exposes a specification compliant interface', function () {
+  describe('The addListener method', function () {
 
-          expect(typeof EventMixin).to.be("function");
+    it('creates a listener array', function () {
 
-          expect(typeof EventMixin.extend).to.be("function");
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(e.events.test).to.be.ok();
+      expect(e.events.test.length).to.be(1);
 
-        });
+    });
 
-        it('registers and triggers events', function (done) {
+    it('return emitter', function () {
 
-          var t = new EventMixin(),
-            test_value = {};
+      var e = new EventMixin(),
+        reference;
 
-          t.on('test', function () {
-            test_value.test = true;
-            expect(test_value.test).to.be(true);
-            done();
-          });
+      reference = e.addListener('test', function () { return null; });
+      expect(reference).to.be(e);
 
-          expect(test_value.test).to.be(undefined);
+    });
 
-          t.trigger('test');
+    it('emits a newListener event', function (done) {
 
-          expect(test_value.test).to.be(undefined);
+      var e = new EventMixin();
+      e.addListener('newListener', function () { done(); });
 
-        });
+    });
 
-        it('executes callbacks in the correct context', function (done) {
+    it('adds listeners that are called more than once', function () {
 
-          var t = new EventMixin(),
-            test_value = {};
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(e.events.test[0].once).to.be(false);
 
-          t.on('test', function () {
-            this.test = true;
-            expect(test_value.test).to.be(true);
-            done();
-          }, test_value);
+    });
 
-          expect(test_value.test).to.be(undefined);
+    it('is aliased by the on method', function () {
 
-          t.trigger('test');
+      expect(EventMixin.prototype.on).to.be(EventMixin.prototype.addListener);
 
-          expect(test_value.test).to.be(undefined);
+    });
 
-        });
+  });
 
-        it('removes events', function (done) {
+  describe('The once method', function () {
 
-          var t = new EventMixin(),
-            test_value = {},
-            callback = function () {
-              test_value.test = true;
-              expect(test_value.test).to.be(true);
+    it('creates a listener array', function () {
 
-              t.off('test', callback);
+      var e = new EventMixin();
+      e.once('test', function () { return null; });
+      expect(e.events.test).to.be.ok();
+      expect(e.events.test.length).to.be(1);
 
-              expect(test_value.test).to.be(true);
+    });
 
-              test_value.test = false;
+    it('return emitter', function () {
 
-              expect(test_value.test).to.be(false);
+      var e = new EventMixin(),
+        reference;
 
-              t.on('test', function () {
+      reference = e.once('test', function () { return null; });
+      expect(reference).to.be(e);
 
-                expect(test_value.test).to.be(false);
+    });
 
-                done();
+    it('emits a newListener event', function (done) {
 
-              });
+      var e = new EventMixin();
+      e.once('newListener', function () { done(); });
 
-              t.trigger('test');
+    });
 
-            };
+    it('adds listeners that are called only once', function () {
 
-          t.on('test', callback);
+      var e = new EventMixin();
+      e.once('test', function () { return null; });
+      expect(e.events.test[0].once).to.be(true);
 
-          expect(test_value.test).to.be(undefined);
+    });
 
-          t.trigger('test');
+  });
 
-          expect(test_value.test).to.be(undefined);
+  describe('The removeListener method', function () {
 
-        });
+    it('removes a listener from an array', function () {
 
-        it('removes events of the same callback but different context correctly', function () {
+      var e = new EventMixin(),
+        noop = function () { return null; };
+      e.addListener('test', noop);
+      e.removeListener('test', noop);
+      expect(e.events.test.length).to.be(0);
 
-          var t = new EventMixin(),
-            callback = function () { return null; },
-            fakeCtx = function () { return null; };
+    });
 
-          t.on('test', callback, fakeCtx);
-          t.on('test', callback, fakeCtx);
-          t.on('test', callback);
-          t.on('test', callback);
+    it('emits the removeListener event', function (done) {
 
-          expect(t.events.test.length).to.be(4);
+      var e = new EventMixin(),
+        noop = function () { return null; };
+      e.addListener('test', noop);
+      e.addListener('removeListener', function () { done(); });
+      e.removeListener('test', noop);
 
-          t.off('test', callback, fakeCtx);
-          expect(t.events.test.length).to.be(2);
+    });
 
-          t.off('test', callback);
-          expect(t.events.test.length).to.be(0);
+    it('does not remove all listeners by accident', function () {
 
-        });
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test', function () { return null; });
+      e.removeListener('test');
+      expect(e.events.test.length).to.be(2);
 
+    });
+
+  });
+
+  describe('The removeAllEvents method', function () {
+
+    it('removes all listeners for an event', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test', function () { return null; });
+      e.removeAllListeners('test');
+      expect(e.events.test.length).to.be(0);
+
+    });
+
+    it('does not remove listeners for untargetd events', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test2', function () { return null; });
+      e.removeAllListeners('test');
+      expect(e.events.test2.length).to.be(1);
+
+    });
+
+    it('removes all listeners when no event given', function () {
+
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      e.addListener('test2', function () { return null; });
+      e.removeAllListeners();
+      expect(e.events.test.length).to.be(0);
+      expect(e.events.test2.length).to.be(0);
+
+    });
+
+  });
+
+  describe('The listeners method', function () {
+
+    it('returns an array of listeners', function () {
+
+      var e = new EventMixin(),
+        noop = function () { return null; },
+        listeners;
+
+      e.addListener('test', noop);
+      listeners = e.listeners('test');
+      expect(listeners[0]).to.be(noop);
+
+    });
+
+  });
+
+  describe('The emit method', function () {
+
+    it('triggers listeners more than once', function (done) {
+
+      var e = new EventMixin(),
+        state = {"count": 0};
+      e.addListener('test', function () { state.count = state.count + 1; });
+      e.addListener('done', function () {
+        expect(state.count).to.be(2);
+        done();
       });
-    }
-  );
+      e.emit('test');
+      e.emit('test');
+      e.emit('done');
 
-}(this, (function (context) {
-  "use strict";
+    });
 
-  // Ignoring the unused "name" in the Node.js definition function.
-  /*jslint unparam: true */
-  if (typeof require === "function" &&
-        module !== undefined &&
-        !!module.exports) {
+    it('only triggers once listeners once', function (done) {
 
-    // If this module is loaded in Node, require each of the
-    // dependencies and pass them along.
-    return function (name, deps, mod) {
+      var e = new EventMixin(),
+        state = {"count": 0};
+      e.once('test', function () { state.count = state.count + 1; });
+      e.once('done', function () {
+        expect(state.count).to.be(1);
+        done();
+      });
+      e.emit('test');
+      e.emit('test');
+      e.emit('done');
 
-      var x,
-        dep_list = [];
+    });
 
-      for (x = 0; x < deps.length; x = x + 1) {
+  });
 
-        dep_list.push(require(deps[x]));
+  describe('The listenerCount method', function () {
 
-      }
+    it('return the listener count', function () {
 
-      module.exports = mod.apply(context, dep_list);
+      var e = new EventMixin();
+      e.addListener('test', function () { return null; });
+      expect(EventMixin.listenerCount(e, 'test')).to.be(1);
 
-    };
+    });
 
-  }
-  /*jslint unparam: false */
+  });
 
-  if (context.window !== undefined) {
+});
 
-    // If this module is being used in a browser environment first
-    // generate a list of dependencies, run the provided definition
-    // function with the list of dependencies, and insert the returned
-    // object into the global namespace using the provided module name.
-    return function (name, deps, mod) {
-
-      var namespaces = name.split('/'),
-        root = context,
-        dep_list = [],
-        current_scope,
-        current_dep,
-        i,
-        x;
-
-      for (i = 0; i < deps.length; i = i + 1) {
-
-        current_scope = root;
-        current_dep = deps[i].split('/');
-
-        for (x = 0; x < current_dep.length; x = x + 1) {
-
-          current_scope = current_scope[current_dep[x]] =
-                          current_scope[current_dep[x]] || {};
-
-        }
-
-        dep_list.push(current_scope);
-
-      }
-
-      current_scope = root;
-      for (i = 1; i < namespaces.length; i = i + 1) {
-
-        current_scope = current_scope[namespaces[i - 1]] =
-                        current_scope[namespaces[i - 1]] || {};
-
-      }
-
-      current_scope[namespaces[i - 1]] = mod.apply(context, dep_list);
-
-    };
-
-  }
-
-  throw new Error("Unrecognized environment.");
-
-}(this))));
