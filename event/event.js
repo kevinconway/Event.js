@@ -79,7 +79,7 @@ module.exports = (function () {
   // events. While new instances of EventMixin can be created directly, it
   // is intended as more of a Mix-In object that can be added to any
   // inheritance chain.
-  EventMixin = Modelo.define(function () {
+  EventMixin = Modelo.define(function EventMixin() {
 
     this.events = {};
     this.maxListeners = 10;
@@ -127,18 +127,16 @@ module.exports = (function () {
     event
   ) {
 
-    var k;
+    var keys,
+      length,
+      x;
 
     if (event === undefined) {
 
-      for (k in this.events) {
-
-        if (this.events.hasOwnProperty(k)) {
-
-          popListeners.call(this, k);
-
-        }
-
+      keys = Object.keys(this.events);
+      length = keys.length;
+      for (x = 0; x < length; x = x + 1) {
+        popListeners.call(this, keys[x]);
       }
 
     } else {
@@ -183,10 +181,15 @@ module.exports = (function () {
   // Returns true if event had listeners, false otherwise.
   EventMixin.prototype.emit = function emit(event) {
 
-    var listenerArgs = Array.prototype.slice(arguments, 1),
+    var listenerArgs = [],
+      length = arguments.length,
       x,
       numberListeners,
       remove = [];
+
+    for (x = 1; x < length; x = x + 1) {
+      listenerArgs[x] = arguments[x];
+    }
 
     this.events[event] = this.events[event] || [];
     numberListeners = this.events[event].length;
@@ -197,7 +200,8 @@ module.exports = (function () {
 
     }
 
-    for (x = 0; x < this.events[event].length; x = x + 1) {
+    length = this.events[event].length;
+    for (x = 0; x < length; x = x + 1) {
 
       defer(
         defer.bind(
@@ -216,7 +220,8 @@ module.exports = (function () {
 
     }
 
-    for (x = 0; x < remove.length; x = x + 1) {
+    length = remove.length;
+    for (x = 0; x < length; x = x + 1) {
 
       this.removeListener(event, remove[x]);
 

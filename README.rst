@@ -63,7 +63,7 @@ Tests
 
 Running the `npm test` command will kick off the default grunt workflow. This
 will lint using jslint, run the mocha/expect tests, generate a browser module,
-and test the browser module using PhantomJS.
+and set up a browser test runner.
 
 License
 =======
