@@ -28,11 +28,6 @@ module.exports = function (grunt) {
         src: ['test/*.js']
       }
     },
-    mocha: {
-      test: {
-        src: ['test/runner.html']
-      }
-    },
     browserify: {
       dist: {
         files: {
@@ -66,24 +61,15 @@ module.exports = function (grunt) {
       prepareBrowserTests: {
         command: 'test/install_libs'
       }
-    },
-    watch: {
-      files: [
-        'event/*.js',
-        '!node_modules/*'
-      ],
-      tasks: ['default'],
-    },
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-jslint');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask('default', ['jslint', 'mochaTest', 'browserify', 'uglify', 'shell', 'mocha']);
+  grunt.registerTask('default', ['jslint', 'mochaTest', 'browserify', 'uglify', 'shell']);
 
 };
