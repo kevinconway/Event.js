@@ -188,7 +188,7 @@ module.exports = (function () {
       remove = [];
 
     for (x = 1; x < length; x = x + 1) {
-      listenerArgs[x] = arguments[x];
+      listenerArgs[x - 1] = arguments[x];
     }
 
     this.events[event] = this.events[event] || [];

@@ -213,6 +213,21 @@ describe('Event.js', function () {
 
     });
 
+    it('passes arguments to the listeners', function (done) {
+
+      var e = new EventMixin();
+
+      e.once('test', function (a, b, c) {
+        expect(a).to.be(true);
+        expect(b).to.be(false);
+        expect(c).to.be(null);
+      });
+      e.once('done', function () { done(); });
+      e.emit('test', true, false, null);
+      e.emit('done');
+
+    });
+
   });
 
   describe('The listenerCount method', function () {
